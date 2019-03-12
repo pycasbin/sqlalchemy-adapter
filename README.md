@@ -13,10 +13,13 @@ SQLAlchemy Adapter is the [SQLAlchemy](https://www.sqlalchemy.org) adapter for [
 
 Based on [Officially Supported Databases](http://www.sqlalchemy.org/), The current supported databases are:
 
-- MySQL
 - PostgreSQL
-- Sqlite3
-- SQL Server
+- MySQL
+- SQLite
+- Oracle
+- Microsoft SQL Server
+- Firebird
+- Sybase
 
 ## Installation
 
