@@ -1,7 +1,7 @@
 from casbin import persist
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
@@ -19,12 +19,36 @@ class CasbinRule(Base):
     v4 = Column(String(255))
     v5 = Column(String(255))
 
+    def __str__(self):
+        text = self.ptype
+
+        if self.v0:
+            text = text + ', ' + self.v0
+        if self.v1:
+            text = text + ', ' + self.v1
+        if self.v2:
+            text = text + ', ' + self.v2
+        if self.v3:
+            text = text + ', ' + self.v3
+        if self.v4:
+            text = text + ', ' + self.v4
+        if self.v5:
+            text = text + ', ' + self.v5
+        return text
+
+    def __repr__(self):
+        return '<CasbinRule {}: "{}">'.format(self.id, str(self))
+
 
 class Adapter(persist.Adapter):
     """the interface for Casbin adapters."""
 
-    def __init__(self, dsn):
-        self._engine = create_engine(dsn)
+    def __init__(self, engine):
+        if isinstance(engine, str):
+            self._engine = create_engine(engine)
+        else:
+            self._engine = engine
+
         session = sessionmaker(bind=self._engine)
         self._session = session()
 
@@ -34,37 +58,22 @@ class Adapter(persist.Adapter):
         """loads all policy rules from the storage."""
         lines = self._session.query(CasbinRule).all()
         for line in lines:
-            text = line.ptype
-
-            if line.v0:
-                text = text + ', ' + line.v0
-            if line.v1:
-                text = text + ', ' + line.v1
-            if line.v2:
-                text = text + ', ' + line.v2
-            if line.v3:
-                text = text + ', ' + line.v3
-            if line.v4:
-                text = text + ', ' + line.v4
-            if line.v5:
-                text = text + ', ' + line.v5
-
-            persist.load_policy_line(text, model)
+            persist.load_policy_line(str(line), model)
 
     def _save_policy_line(self, ptype, rule):
         line = CasbinRule(ptype=ptype)
         if len(rule) > 0:
             line.v0 = rule[0]
         if len(rule) > 1:
-            line.v0 = rule[1]
+            line.v1 = rule[1]
         if len(rule) > 2:
-            line.v0 = rule[2]
+            line.v2 = rule[2]
         if len(rule) > 3:
-            line.v0 = rule[3]
+            line.v3 = rule[3]
         if len(rule) > 4:
-            line.v0 = rule[4]
+            line.v4 = rule[4]
         if len(rule) > 5:
-            line.v0 = rule[5]
+            line.v5 = rule[5]
         self._session.add(line)
         self._session.commit()
 
