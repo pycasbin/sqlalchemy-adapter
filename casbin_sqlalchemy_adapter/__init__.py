@@ -1,1 +1,1 @@
-from .adapter import CasbinRule, Adapter
+from .adapter import CasbinRule, Adapter, Base
