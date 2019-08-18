@@ -93,7 +93,25 @@ class Adapter(persist.Adapter):
 
     def remove_policy(self, sec, ptype, rule):
         """removes a policy rule from the storage."""
-        pass
+        query = self._session.query(CasbinRule)
+        query = query.filter(CasbinRule.ptype == ptype)
+        if len(rule) > 0:
+            query = query.filter(CasbinRule.v0 == rule[0])
+        if len(rule) > 1:
+            query = query.filter(CasbinRule.v1 == rule[1])
+        if len(rule) > 2:
+            query = query.filter(CasbinRule.v2 == rule[2])
+        if len(rule) > 3:
+            query = query.filter(CasbinRule.v3 == rule[3])
+        if len(rule) > 4:
+            query = query.filter(CasbinRule.v4 == rule[4])
+        if len(rule) > 5:
+            query = query.filter(CasbinRule.v5 == rule[5])
+
+        r = query.delete()
+        self._session.commit()
+
+        return True if r > 0 else False
 
     def remove_filtered_policy(self, sec, ptype, field_index, *field_values):
         """removes policy rules that match the filter from the storage.
