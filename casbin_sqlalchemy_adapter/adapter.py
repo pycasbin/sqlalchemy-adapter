@@ -113,7 +113,7 @@ class Adapter(persist.Adapter):
 
         return True if r > 0 else False
 
-    def remove_filtered_policy1(self, sec, ptype, field_index, *field_values):
+    def remove_filtered_policy(self, sec, ptype, field_index, *field_values):
         """removes policy rules that match the filter from the storage.
         This is part of the Auto-Save feature.
         """
@@ -121,9 +121,8 @@ class Adapter(persist.Adapter):
         query = query.filter(CasbinRule.ptype == ptype)
         if field_index < 0:
             return False
-        for i in range(field_index, len(field_values)):
-            query = query.filter(CasbinRule.get('v' + str(i)) == field_values[0])
-
+        for i in range(len(field_values)):
+            query = query.filter(getattr(CasbinRule, 'v' + str(field_index + i)) == field_values[i])
         r = query.delete()
         self._session.commit()
 
