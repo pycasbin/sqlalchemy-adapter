@@ -74,6 +74,23 @@ class TestConfig(TestCase):
         self.assertTrue(res)
         self.assertFalse(e.enforce("alice", "data5", "read"))
 
+    def test_remove_filtered_policy(self):
+        e = get_enforcer()
+        self.assertFalse(e.enforce("alice", "data5", "read"))
+        e.add_permission_for_user("alice", "data5", "read")
+        self.assertTrue(e.enforce("alice", "data5", "read"))
+        res = e.remove_filtered_policy(0, "alice", "data5", "read")
+        self.assertFalse(e.enforce("alice", "data5", "read"))
+        self.assertTrue(res)
+        e.add_permission_for_user("alice", "special_data", "admin")
+        self.assertTrue(e.enforce("alice", "special_data", "admin"))
+        e.add_permission_for_user("bob", "special_data", "admin")
+        self.assertTrue(e.enforce("bob", "special_data", "admin"))
+        res = e.remove_filtered_policy(1, "special_data", "admin")
+        self.assertTrue(res)
+        self.assertFalse(e.enforce("alice", "special_data", "admin"))
+        self.assertFalse(e.enforce("bob", "special_data", "admin"))
+
     def test_str(self):
         rule = CasbinRule(ptype='p', v0='alice', v1='data1', v2='read')
         self.assertEqual(str(rule), 'p, alice, data1, read')
