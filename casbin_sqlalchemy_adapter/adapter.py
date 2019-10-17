@@ -122,7 +122,8 @@ class Adapter(persist.Adapter):
         if field_index < 0 or len(field_values)>6:
             return False
         for i in range(len(field_values)):
-            query = query.filter(getattr(CasbinRule, 'v' + str(field_index + i)) == field_values[i])
+            if field_values[i] != "":
+                query = query.filter(getattr(CasbinRule, 'v' + str(field_index + i)) == field_values[i])
         r = query.delete()
         self._session.commit()
 
