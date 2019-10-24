@@ -20,21 +20,12 @@ class CasbinRule(Base):
     v5 = Column(String(255))
 
     def __str__(self):
-        text = self.ptype
-
-        if self.v0:
-            text = text + ', ' + self.v0
-        if self.v1:
-            text = text + ', ' + self.v1
-        if self.v2:
-            text = text + ', ' + self.v2
-        if self.v3:
-            text = text + ', ' + self.v3
-        if self.v4:
-            text = text + ', ' + self.v4
-        if self.v5:
-            text = text + ', ' + self.v5
-        return text
+        arr = [self.ptype]
+        for v in (self.v0, self.v1, self.v2, self.v3, self.v4, self.v5):
+            if v is None:
+                break
+            arr.append(v)
+        return ', '.join(arr)
 
     def __repr__(self):
         return '<CasbinRule {}: "{}">'.format(self.id, str(self))
@@ -62,18 +53,8 @@ class Adapter(persist.Adapter):
 
     def _save_policy_line(self, ptype, rule):
         line = CasbinRule(ptype=ptype)
-        if len(rule) > 0:
-            line.v0 = rule[0]
-        if len(rule) > 1:
-            line.v1 = rule[1]
-        if len(rule) > 2:
-            line.v2 = rule[2]
-        if len(rule) > 3:
-            line.v3 = rule[3]
-        if len(rule) > 4:
-            line.v4 = rule[4]
-        if len(rule) > 5:
-            line.v5 = rule[5]
+        for i, v in enumerate(rule):
+            setattr(line, 'v{}'.format(i), v)
         self._session.add(line)
         self._session.commit()
 
@@ -95,19 +76,8 @@ class Adapter(persist.Adapter):
         """removes a policy rule from the storage."""
         query = self._session.query(CasbinRule)
         query = query.filter(CasbinRule.ptype == ptype)
-        if len(rule) > 0:
-            query = query.filter(CasbinRule.v0 == rule[0])
-        if len(rule) > 1:
-            query = query.filter(CasbinRule.v1 == rule[1])
-        if len(rule) > 2:
-            query = query.filter(CasbinRule.v2 == rule[2])
-        if len(rule) > 3:
-            query = query.filter(CasbinRule.v3 == rule[3])
-        if len(rule) > 4:
-            query = query.filter(CasbinRule.v4 == rule[4])
-        if len(rule) > 5:
-            query = query.filter(CasbinRule.v5 == rule[5])
-
+        for i, v in enumerate(rule):
+            query = query.filter(getattr(CasbinRule, 'v{}'.format(i)) == v)
         r = query.delete()
         self._session.commit()
 
@@ -119,11 +89,12 @@ class Adapter(persist.Adapter):
         """
         query = self._session.query(CasbinRule)
         query = query.filter(CasbinRule.ptype == ptype)
-        if field_index < 0 or len(field_values)>6:
+        if not (0 <= field_index <= 5):
             return False
-        for i in range(len(field_values)):
-            if field_values[i] != "":
-                query = query.filter(getattr(CasbinRule, 'v' + str(field_index + i)) == field_values[i])
+        if not (1 <= field_index + len(field_values) <= 6):
+            return False
+        for i, v in enumerate(field_values):
+            query = query.filter(getattr(CasbinRule, 'v{}'.format(field_index + i)) == v)
         r = query.delete()
         self._session.commit()
 
