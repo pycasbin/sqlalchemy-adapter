@@ -1,2 +1,2 @@
-casbin>=0.2
+casbin>=0.8.1
 SQLAlchemy>=1.2.18
