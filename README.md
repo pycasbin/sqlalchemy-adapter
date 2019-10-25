@@ -9,7 +9,7 @@ SQLAlchemy Adapter for PyCasbin
 [![Download](https://img.shields.io/pypi/dm/casbin_sqlalchemy_adapter.svg)](https://pypi.org/project/casbin_sqlalchemy_adapter/)
 [![License](https://img.shields.io/pypi/l/casbin_sqlalchemy_adapter.svg)](https://pypi.org/project/casbin_sqlalchemy_adapter/)
 
-SQLAlchemy Adapter is the [SQLAlchemy](https://www.sqlalchemy.org) adapter for [PyCasbin](https://github.com/pycasbin/sqlalchemy-adapter). With this library, Casbin can load policy from SQLAlchemy supported database or save policy to it.
+SQLAlchemy Adapter is the [SQLAlchemy](https://www.sqlalchemy.org) adapter for [PyCasbin](https://github.com/casbin/pycasbin). With this library, Casbin can load policy from SQLAlchemy supported database or save policy to it.
 
 Based on [Officially Supported Databases](http://www.sqlalchemy.org/), The current supported databases are:
 

@@ -7,7 +7,7 @@ with open(desc_file, "r") as fh:
 
 setuptools.setup(
     name="casbin_sqlalchemy_adapter",
-    version="0.0.3",
+    version="0.1.0",
     author="TechLee",
     author_email="techlee@qq.com",
     description="SQLAlchemy Adapter for PyCasbin",
@@ -16,7 +16,7 @@ setuptools.setup(
     url="https://github.com/pycasbin/sqlalchemy-adapter",
     keywords=["casbin", "SQLAlchemy", "casbin-adapter", "rbac", "access control", "abac", "acl", "permission"],
     packages=setuptools.find_packages(),
-    install_requires=['casbin>=0.2', 'SQLAlchemy>=1.2.18'],
+    install_requires=['casbin>=0.8.1', 'SQLAlchemy>=1.2.18'],
     python_requires=">=3.3",
     license="Apache 2.0",
     classifiers=[
