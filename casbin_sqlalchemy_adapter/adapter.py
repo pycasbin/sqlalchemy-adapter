@@ -56,21 +56,27 @@ class Adapter(persist.Adapter):
         for i, v in enumerate(rule):
             setattr(line, 'v{}'.format(i), v)
         self._session.add(line)
+
+    def _commit(self):
         self._session.commit()
 
     def save_policy(self, model):
         """saves all policy rules to the storage."""
+        query = self._session.query(CasbinRule)
+        query.delete()
         for sec in ["p", "g"]:
             if sec not in model.model.keys():
                 continue
             for ptype, ast in model.model[sec].items():
                 for rule in ast.policy:
                     self._save_policy_line(ptype, rule)
+        self._commit()
         return True
 
     def add_policy(self, sec, ptype, rule):
         """adds a policy rule to the storage."""
         self._save_policy_line(ptype, rule)
+        self._commit()
 
     def remove_policy(self, sec, ptype, rule):
         """removes a policy rule from the storage."""
@@ -79,7 +85,7 @@ class Adapter(persist.Adapter):
         for i, v in enumerate(rule):
             query = query.filter(getattr(CasbinRule, 'v{}'.format(i)) == v)
         r = query.delete()
-        self._session.commit()
+        self._commit()
 
         return True if r > 0 else False
 
@@ -96,7 +102,7 @@ class Adapter(persist.Adapter):
         for i, v in enumerate(field_values):
             query = query.filter(getattr(CasbinRule, 'v{}'.format(field_index + i)) == v)
         r = query.delete()
-        self._session.commit()
+        self._commit()
 
         return True if r > 0 else False
 
