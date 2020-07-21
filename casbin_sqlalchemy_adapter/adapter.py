@@ -56,6 +56,7 @@ class Adapter(persist.Adapter):
         else:
             self._engine = engine
 
+        self._db_class = CasbinRule
         session = sessionmaker(bind=self._engine)
         self._session = session()
 
@@ -100,12 +101,12 @@ class Adapter(persist.Adapter):
 
     def load_policy(self, model):
         """loads all policy rules from the storage."""
-        lines = self._session.query(CasbinRule).all()
+        lines = self._session.query(self._db_class).all()
         for line in lines:
             persist.load_policy_line(str(line), model)
 
     def _save_policy_line(self, ptype, rule):
-        line = CasbinRule(ptype=ptype)
+        line = self._db_class(ptype=ptype)
         for i, v in enumerate(rule):
             setattr(line, "v{}".format(i), v)
         self._session.add(line)
@@ -115,7 +116,7 @@ class Adapter(persist.Adapter):
 
     def save_policy(self, model):
         """saves all policy rules to the storage."""
-        query = self._session.query(CasbinRule)
+        query = self._session.query(self._db_class)
         query.delete()
         for sec in ["p", "g"]:
             if sec not in model.model.keys():
@@ -133,10 +134,10 @@ class Adapter(persist.Adapter):
 
     def remove_policy(self, sec, ptype, rule):
         """removes a policy rule from the storage."""
-        query = self._session.query(CasbinRule)
-        query = query.filter(CasbinRule.ptype == ptype)
+        query = self._session.query(self._db_class)
+        query = query.filter(self._db_class.ptype == ptype)
         for i, v in enumerate(rule):
-            query = query.filter(getattr(CasbinRule, "v{}".format(i)) == v)
+            query = query.filter(getattr(self._db_class, "v{}".format(i)) == v)
         r = query.delete()
         self._commit()
 
@@ -146,14 +147,14 @@ class Adapter(persist.Adapter):
         """removes policy rules that match the filter from the storage.
         This is part of the Auto-Save feature.
         """
-        query = self._session.query(CasbinRule)
-        query = query.filter(CasbinRule.ptype == ptype)
+        query = self._session.query(self._db_class)
+        query = query.filter(self._db_class.ptype == ptype)
         if not (0 <= field_index <= 5):
             return False
         if not (1 <= field_index + len(field_values) <= 6):
             return False
         for i, v in enumerate(field_values):
-            query = query.filter(getattr(CasbinRule, "v{}".format(field_index + i)) == v)
+            query = query.filter(getattr(self._db_class, "v{}".format(field_index + i)) == v)
         r = query.delete()
         self._commit()
 
