@@ -50,7 +50,7 @@ class PolicyFilter:
 class Adapter(persist.Adapter):
     """the interface for Casbin adapters."""
 
-    def __init__(self, engine, filtered):
+    def __init__(self, engine, filtered=False):
         if isinstance(engine, str):
             self._engine = create_engine(engine)
         else:
