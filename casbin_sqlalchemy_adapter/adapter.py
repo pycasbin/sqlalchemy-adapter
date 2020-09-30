@@ -50,6 +50,7 @@ class Adapter(persist.Adapter):
         lines = self._session.query(CasbinRule).all()
         for line in lines:
             persist.load_policy_line(str(line), model)
+        self._commit()
 
     def _save_policy_line(self, ptype, rule):
         line = CasbinRule(ptype=ptype)
