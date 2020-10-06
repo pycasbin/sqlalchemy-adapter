@@ -50,13 +50,15 @@ class PolicyFilter:
 class Adapter(persist.Adapter):
     """the interface for Casbin adapters."""
 
-    def __init__(self, engine, filtered=False):
+    def __init__(self, engine, db_class=None, filtered=False):
         if isinstance(engine, str):
             self._engine = create_engine(engine)
         else:
             self._engine = engine
 
-        self._db_class = CasbinRule
+        if db_class is None:
+            db_class = CasbinRule
+        self._db_class = db_class
         session = sessionmaker(bind=self._engine)
         self._session = session()
 
