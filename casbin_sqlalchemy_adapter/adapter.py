@@ -70,7 +70,7 @@ class Adapter(persist.Adapter):
 
     def load_filtered_policy(self, model, filter) -> None:
         """loads all policy rules from the storage."""
-
+        self._commit()  # Commit transaction, so you can see the insert/update/delete from other transaction when use multi processes(eg. Nginx reverse proxy)
         self._filtered = True
         query = self._session.query(self._db_class)
         filters = []
@@ -103,10 +103,10 @@ class Adapter(persist.Adapter):
 
     def load_policy(self, model):
         """loads all policy rules from the storage."""
+        self._commit()  # Commit transaction, so you can see the insert/update/delete from other transaction when use multi processes(eg. Nginx reverse proxy)
         lines = self._session.query(self._db_class).all()
         for line in lines:
             persist.load_policy_line(str(line), model)
-        self._commit()
 
     def _save_policy_line(self, ptype, rule):
         line = self._db_class(ptype=ptype)
