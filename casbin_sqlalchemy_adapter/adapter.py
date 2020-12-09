@@ -83,6 +83,7 @@ class Adapter(persist.Adapter):
 
         for line in query.all():
             persist.load_policy_line(str(line), model)
+        self._commit()
 
     def __build_rule_filter(self, filter):
         rules = []
@@ -107,6 +108,7 @@ class Adapter(persist.Adapter):
         lines = self._session.query(self._db_class).all()
         for line in lines:
             persist.load_policy_line(str(line), model)
+        self._commit()
 
     def _save_policy_line(self, ptype, rule):
         line = self._db_class(ptype=ptype)
