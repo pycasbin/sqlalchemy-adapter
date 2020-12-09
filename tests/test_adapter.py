@@ -132,7 +132,11 @@ class TestConfig(TestCase):
 
         enforcer.get_model().clear_policy()
 
-        enforcer.load_filtered_policy(PolicyFilter(p=(Filter(v0="alice")), g=(Filter(v0="alice"))))
-        self.assertFalse(enforcer.enforce("alice", "data1", "read"))
+        enforcer.load_filtered_policy(PolicyFilter(p=(Filter(v0="alice"),), g=(Filter(v0="alice"),)))  # PolicyFilter.p and PolicyFilter.g need to be iterable(eg. set(),  Notice the comma at the end)
+        """
+        p, alice, data1, read
+        g, alice, data2_admin
+        """
+        self.assertTrue(enforcer.enforce("alice", "data1", "read"))
         self.assertFalse(enforcer.enforce("bob", "data2", "write"))
-        self.assertTrue(enforcer.enforce("alice", "data2", "write"))
+        self.assertFalse(enforcer.enforce("alice", "data2", "write"))
