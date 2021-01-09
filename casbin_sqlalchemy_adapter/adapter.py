@@ -1,12 +1,10 @@
 from casbin import persist
 from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_, or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
-
-
 class CasbinRule(Base):
     __tablename__ = 'casbin_rule'
 
@@ -31,30 +29,81 @@ class CasbinRule(Base):
         return '<CasbinRule {}: "{}">'.format(self.id, str(self))
 
 
+class Filter:
+    ptype = []
+    v0 = []
+    v1 = []
+    v2 = []
+    v3 = []
+    v4 = []
+    v5 = []
+
 class Adapter(persist.Adapter):
     """the interface for Casbin adapters."""
 
-    def __init__(self, engine):
+    def __init__(self, engine, db_class=None, filtered=False):
         if isinstance(engine, str):
             self._engine = create_engine(engine)
         else:
             self._engine = engine
 
+        if db_class is None:
+            db_class = CasbinRule
+        self._db_class = db_class
         session = sessionmaker(bind=self._engine)
         self._session = session()
 
         Base.metadata.create_all(self._engine)
+        self._filtered = filtered
 
     def load_policy(self, model):
         """loads all policy rules from the storage."""
-        lines = self._session.query(CasbinRule).all()
+        lines = self._session.query(self._db_class).all()
         for line in lines:
             persist.load_policy_line(str(line), model)
+        self._commit()
 
-    def _save_policy_line(self, ptype, rule):
-        line = CasbinRule(ptype=ptype)
+    def is_filtered(self):
+        return self._filtered
+
+    def load_filtered_policy(self, model, filter) -> None:
+        """loads all policy rules from the storage."""
+        query = self._session.query(self._db_class)
+        filters = self.filter_query(query,filter)
+        filters = filters.all()
+
+        for line in filters:
+            persist.load_policy_line(str(line), model)
+        self._filtered = True
+        
+    def filter_query(self,querydb,filter):
+        ret = []
+        if len(filter.ptype) >0:
+            ret = querydb.filter(CasbinRule.ptype.in_(filter.ptype)).order_by(CasbinRule.id)
+            return ret
+        if len(filter.v0) >0:
+            ret = querydb.filter(CasbinRule.v0.in_(filter.v0)).order_by(CasbinRule.id)
+            return ret
+        if len(filter.v1) >0:
+            ret = querydb.filter(CasbinRule.v1.in_(filter.v1)).order_by(CasbinRule.id)
+            return ret
+        if len(filter.v2) >0:
+            ret = querydb.filter(CasbinRule.v2.in_(filter.v2)).order_by(CasbinRule.id)
+            return ret
+        if len(filter.v3) >0:
+            ret = querydb.filter(CasbinRule.v3.in_(filter.v3)).order_by(CasbinRule.id)
+            return ret
+        if len(filter.v4) >0:
+            ret = querydb.filter(CasbinRule.v4.in_(filter.v4)).order_by(CasbinRule.id)
+            return ret
+        if len(filter.v5) >0:
+            ret = querydb.filter(CasbinRule.v5.in_(filter.v5)).order_by(CasbinRule.id)
+            return ret
+
+    def _save_policy_line(self,ptype,rule):
+        line = self._db_class(ptype=ptype)
         for i, v in enumerate(rule):
-            setattr(line, 'v{}'.format(i), v)
+            setattr(line, "v{}".format(i), v)
         self._session.add(line)
 
     def _commit(self):
@@ -62,7 +111,7 @@ class Adapter(persist.Adapter):
 
     def save_policy(self, model):
         """saves all policy rules to the storage."""
-        query = self._session.query(CasbinRule)
+        query = self._session.query(self._db_class)
         query.delete()
         for sec in ["p", "g"]:
             if sec not in model.model.keys():
@@ -80,10 +129,10 @@ class Adapter(persist.Adapter):
 
     def remove_policy(self, sec, ptype, rule):
         """removes a policy rule from the storage."""
-        query = self._session.query(CasbinRule)
-        query = query.filter(CasbinRule.ptype == ptype)
+        query = self._session.query(self._db_class)
+        query = query.filter(self._db_class.ptype == ptype)
         for i, v in enumerate(rule):
-            query = query.filter(getattr(CasbinRule, 'v{}'.format(i)) == v)
+            query = query.filter(getattr(self._db_class, "v{}".format(i)) == v)
         r = query.delete()
         self._commit()
 
@@ -93,14 +142,14 @@ class Adapter(persist.Adapter):
         """removes policy rules that match the filter from the storage.
         This is part of the Auto-Save feature.
         """
-        query = self._session.query(CasbinRule)
-        query = query.filter(CasbinRule.ptype == ptype)
+        query = self._session.query(self._db_class)
+        query = query.filter(self._db_class.ptype == ptype)
         if not (0 <= field_index <= 5):
             return False
         if not (1 <= field_index + len(field_values) <= 6):
             return False
         for i, v in enumerate(field_values):
-            query = query.filter(getattr(CasbinRule, 'v{}'.format(field_index + i)) == v)
+            query = query.filter(getattr(self._db_class, "v{}".format(field_index + i)) == v)
         r = query.delete()
         self._commit()
 
