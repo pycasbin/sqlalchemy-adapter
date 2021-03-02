@@ -5,8 +5,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
+
+
 class CasbinRule(Base):
-    __tablename__ = 'casbin_rule'
+    __tablename__ = "casbin_rule"
 
     id = Column(Integer, primary_key=True)
     ptype = Column(String(255))
@@ -23,7 +25,7 @@ class CasbinRule(Base):
             if v is None:
                 break
             arr.append(v)
-        return ', '.join(arr)
+        return ", ".join(arr)
 
     def __repr__(self):
         return '<CasbinRule {}: "{}">'.format(self.id, str(self))
@@ -37,6 +39,7 @@ class Filter:
     v3 = []
     v4 = []
     v5 = []
+
 
 class Adapter(persist.Adapter):
     """the interface for Casbin adapters."""
@@ -69,38 +72,31 @@ class Adapter(persist.Adapter):
     def load_filtered_policy(self, model, filter) -> None:
         """loads all policy rules from the storage."""
         query = self._session.query(self._db_class)
-        filters = self.filter_query(query,filter)
+        filters = self.filter_query(query, filter)
         filters = filters.all()
 
         for line in filters:
             persist.load_policy_line(str(line), model)
         self._filtered = True
-        
-    def filter_query(self,querydb,filter):
-        ret = []
-        if len(filter.ptype) >0:
-            ret = querydb.filter(CasbinRule.ptype.in_(filter.ptype)).order_by(CasbinRule.id)
-            return ret
-        if len(filter.v0) >0:
-            ret = querydb.filter(CasbinRule.v0.in_(filter.v0)).order_by(CasbinRule.id)
-            return ret
-        if len(filter.v1) >0:
-            ret = querydb.filter(CasbinRule.v1.in_(filter.v1)).order_by(CasbinRule.id)
-            return ret
-        if len(filter.v2) >0:
-            ret = querydb.filter(CasbinRule.v2.in_(filter.v2)).order_by(CasbinRule.id)
-            return ret
-        if len(filter.v3) >0:
-            ret = querydb.filter(CasbinRule.v3.in_(filter.v3)).order_by(CasbinRule.id)
-            return ret
-        if len(filter.v4) >0:
-            ret = querydb.filter(CasbinRule.v4.in_(filter.v4)).order_by(CasbinRule.id)
-            return ret
-        if len(filter.v5) >0:
-            ret = querydb.filter(CasbinRule.v5.in_(filter.v5)).order_by(CasbinRule.id)
-            return ret
 
-    def _save_policy_line(self,ptype,rule):
+    def filter_query(self, querydb, filter):
+        if len(filter.ptype) > 0:
+            querydb = querydb.filter(CasbinRule.ptype.in_(filter.ptype))
+        if len(filter.v0) > 0:
+            querydb = querydb.filter(CasbinRule.v0.in_(filter.v0))
+        if len(filter.v1) > 0:
+            querydb = querydb.filter(CasbinRule.v1.in_(filter.v1))
+        if len(filter.v2) > 0:
+            querydb = querydb.filter(CasbinRule.v2.in_(filter.v2))
+        if len(filter.v3) > 0:
+            querydb = querydb.filter(CasbinRule.v3.in_(filter.v3))
+        if len(filter.v4) > 0:
+            querydb = querydb.filter(CasbinRule.v4.in_(filter.v4))
+        if len(filter.v5) > 0:
+            querydb = querydb.filter(CasbinRule.v5.in_(filter.v5))
+        return querydb.order_by(CasbinRule.id)
+
+    def _save_policy_line(self, ptype, rule):
         line = self._db_class(ptype=ptype)
         for i, v in enumerate(rule):
             setattr(line, "v{}".format(i), v)
