@@ -145,7 +145,8 @@ class Adapter(persist.Adapter):
         if not (1 <= field_index + len(field_values) <= 6):
             return False
         for i, v in enumerate(field_values):
-            query = query.filter(getattr(self._db_class, "v{}".format(field_index + i)) == v)
+            if v != '':
+                query = query.filter(getattr(self._db_class, "v{}".format(field_index + i)) == v)
         r = query.delete()
         self._commit()
 
