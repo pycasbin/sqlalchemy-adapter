@@ -123,6 +123,12 @@ class Adapter(persist.Adapter):
         self._save_policy_line(ptype, rule)
         self._commit()
 
+    def add_policies(self, sec, ptype, rules):
+        """adds a policy rules to the storage."""
+        for rule in rules:
+            self._save_policy_line(ptype, rule)
+        self._commit()
+
     def remove_policy(self, sec, ptype, rule):
         """removes a policy rule from the storage."""
         query = self._session.query(self._db_class)
@@ -133,6 +139,16 @@ class Adapter(persist.Adapter):
         self._commit()
 
         return True if r > 0 else False
+
+    def remove_policies(self, sec, ptype, rules):
+        """removes a policy rules from the storage."""
+        query = self._session.query(self._db_class)
+        query = query.filter(self._db_class.ptype == ptype)
+        for rule in rules:
+            query = query.filter(or_(getattr(self._db_class, "v{}".format(i)) == v for i, v in enumerate(rule)))
+        query.delete()
+        self._commit()
+
 
     def remove_filtered_policy(self, sec, ptype, field_index, *field_values):
         """removes policy rules that match the filter from the storage.
