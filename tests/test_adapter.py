@@ -50,6 +50,15 @@ class TestConfig(TestCase):
         e = get_enforcer()
 
         self.assertFalse(e.enforce('eve', 'data3', 'read'))
+        res = e.add_policies((('eve', 'data3', 'read'), ('eve', 'data4', 'read')))
+        self.assertTrue(res)
+        self.assertTrue(e.enforce('eve', 'data3', 'read'))
+        self.assertTrue(e.enforce('eve', 'data4', 'read'))
+
+    def test_add_policies(self):
+        e = get_enforcer()
+
+        self.assertFalse(e.enforce('eve', 'data3', 'read'))
         res = e.add_permission_for_user('eve', 'data3', 'read')
         self.assertTrue(res)
         self.assertTrue(e.enforce('eve', 'data3', 'read'))
@@ -75,6 +84,18 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce('alice', 'data5', 'read'))
         e.delete_permission_for_user('alice', 'data5', 'read')
         self.assertFalse(e.enforce('alice', 'data5', 'read'))
+
+    def test_remove_policies(self):
+        e = get_enforcer()
+
+        self.assertFalse(e.enforce('alice', 'data5', 'read'))
+        self.assertFalse(e.enforce('alice', 'data6', 'read'))
+        e.add_policies((('alice', 'data5', 'read'), ('alice', 'data6', 'read')))
+        self.assertTrue(e.enforce('alice', 'data5', 'read'))
+        self.assertTrue(e.enforce('alice', 'data6', 'read'))
+        e.remove_policies((('alice', 'data5', 'read'), ('alice', 'data6', 'read')))
+        self.assertFalse(e.enforce('alice', 'data5', 'read'))
+        self.assertFalse(e.enforce('alice', 'data6', 'read'))
 
     def test_remove_filtered_policy(self):
         e = get_enforcer()
@@ -139,7 +160,7 @@ class TestConfig(TestCase):
     def test_filtered_policy(self):
         e= get_enforcer()
         filter = Filter()
-        
+
         filter.ptype = ['p']
         e.load_filtered_policy(filter)
         self.assertTrue(e.enforce('alice', 'data1', 'read'))
@@ -150,7 +171,7 @@ class TestConfig(TestCase):
         self.assertFalse(e.enforce('bob', 'data1', 'write'))
         self.assertFalse(e.enforce('bob', 'data2', 'read'))
         self.assertTrue(e.enforce('bob', 'data2', 'write'))
-        
+
         filter.ptype = []
         filter.v0 = ['alice']
         e.load_filtered_policy(filter)
@@ -164,7 +185,7 @@ class TestConfig(TestCase):
         self.assertFalse(e.enforce('bob', 'data2', 'write'))
         self.assertFalse(e.enforce('data2_admin', 'data2','read'))
         self.assertFalse(e.enforce('data2_admin', 'data2','write'))
-        
+
         filter.v0 = ['bob']
         e.load_filtered_policy(filter)
         self.assertFalse(e.enforce('alice', 'data1', 'read'))
@@ -177,7 +198,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce('bob', 'data2', 'write'))
         self.assertFalse(e.enforce('data2_admin', 'data2','read'))
         self.assertFalse(e.enforce('data2_admin', 'data2','write'))
-        
+
         filter.v0 = ['data2_admin']
         e.load_filtered_policy(filter)
         self.assertTrue(e.enforce('data2_admin', 'data2','read'))
@@ -203,7 +224,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce('bob', 'data2', 'write'))
         self.assertFalse(e.enforce('data2_admin', 'data2','read'))
         self.assertFalse(e.enforce('data2_admin', 'data2','write'))
-        
+
         filter.v0 = []
         filter.v1 = ['data1']
         e.load_filtered_policy(filter)
@@ -230,7 +251,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce('bob', 'data2', 'write'))
         self.assertTrue(e.enforce('data2_admin', 'data2','read'))
         self.assertTrue(e.enforce('data2_admin', 'data2','write'))
-        
+
         filter.v1 = []
         filter.v2 = ['read']
         e.load_filtered_policy(filter)
