@@ -7,7 +7,7 @@ with open(desc_file, "r") as fh:
 
 setuptools.setup(
     name="casbin_sqlalchemy_adapter",
-    version="0.3.0",
+    version="0.3.1",
     author="TechLee",
     author_email="techlee@qq.com",
     description="SQLAlchemy Adapter for PyCasbin",
