@@ -1,6 +1,8 @@
+from contextlib import contextmanager
+
 from casbin import persist
 from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine, and_, or_
+from sqlalchemy import create_engine, or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -53,31 +55,44 @@ class Adapter(persist.Adapter):
         if db_class is None:
             db_class = CasbinRule
         self._db_class = db_class
-        session = sessionmaker(bind=self._engine)
-        self._session = session()
+        self.session_local = sessionmaker(bind=self._engine)
 
         Base.metadata.create_all(self._engine)
         self._filtered = filtered
 
+    @contextmanager
+    def _session_scope(self):
+        """Provide a transactional scope around a series of operations."""
+        session = self.session_local()
+        try:
+            yield session
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
     def load_policy(self, model):
         """loads all policy rules from the storage."""
-        lines = self._session.query(self._db_class).all()
-        for line in lines:
-            persist.load_policy_line(str(line), model)
-        self._commit()
+        with self._session_scope() as session:
+            lines = session.query(self._db_class).all()
+            for line in lines:
+                persist.load_policy_line(str(line), model)
 
     def is_filtered(self):
         return self._filtered
 
     def load_filtered_policy(self, model, filter) -> None:
         """loads all policy rules from the storage."""
-        query = self._session.query(self._db_class)
-        filters = self.filter_query(query, filter)
-        filters = filters.all()
+        with self._session_scope() as session:
+            query = session.query(self._db_class)
+            filters = self.filter_query(query, filter)
+            filters = filters.all()
 
-        for line in filters:
-            persist.load_policy_line(str(line), model)
-        self._filtered = True
+            for line in filters:
+                persist.load_policy_line(str(line), model)
+            self._filtered = True
 
     def filter_query(self, querydb, filter):
         if len(filter.ptype) > 0:
@@ -97,76 +112,68 @@ class Adapter(persist.Adapter):
         return querydb.order_by(CasbinRule.id)
 
     def _save_policy_line(self, ptype, rule):
-        line = self._db_class(ptype=ptype)
-        for i, v in enumerate(rule):
-            setattr(line, "v{}".format(i), v)
-        self._session.add(line)
-
-    def _commit(self):
-        self._session.commit()
+        with self._session_scope() as session:
+            line = self._db_class(ptype=ptype)
+            for i, v in enumerate(rule):
+                setattr(line, "v{}".format(i), v)
+            session.add(line)
 
     def save_policy(self, model):
         """saves all policy rules to the storage."""
-        query = self._session.query(self._db_class)
-        query.delete()
-        for sec in ["p", "g"]:
-            if sec not in model.model.keys():
-                continue
-            for ptype, ast in model.model[sec].items():
-                for rule in ast.policy:
-                    self._save_policy_line(ptype, rule)
-        self._commit()
+        with self._session_scope() as session:
+            query = session.query(self._db_class)
+            query.delete()
+            for sec in ["p", "g"]:
+                if sec not in model.model.keys():
+                    continue
+                for ptype, ast in model.model[sec].items():
+                    for rule in ast.policy:
+                        self._save_policy_line(ptype, rule)
         return True
 
     def add_policy(self, sec, ptype, rule):
         """adds a policy rule to the storage."""
         self._save_policy_line(ptype, rule)
-        self._commit()
 
     def add_policies(self, sec, ptype, rules):
         """adds a policy rules to the storage."""
         for rule in rules:
             self._save_policy_line(ptype, rule)
-        self._commit()
 
     def remove_policy(self, sec, ptype, rule):
         """removes a policy rule from the storage."""
-        query = self._session.query(self._db_class)
-        query = query.filter(self._db_class.ptype == ptype)
-        for i, v in enumerate(rule):
-            query = query.filter(getattr(self._db_class, "v{}".format(i)) == v)
-        r = query.delete()
-        self._commit()
+        with self._session_scope() as session:
+            query = session.query(self._db_class)
+            query = query.filter(self._db_class.ptype == ptype)
+            for i, v in enumerate(rule):
+                query = query.filter(getattr(self._db_class, "v{}".format(i)) == v)
+            r = query.delete()
 
         return True if r > 0 else False
 
     def remove_policies(self, sec, ptype, rules):
         """removes a policy rules from the storage."""
-        query = self._session.query(self._db_class)
-        query = query.filter(self._db_class.ptype == ptype)
-        for rule in rules:
-            query = query.filter(or_(getattr(self._db_class, "v{}".format(i)) == v for i, v in enumerate(rule)))
-        query.delete()
-        self._commit()
-
+        with self._session_scope() as session:
+            query = session.query(self._db_class)
+            query = query.filter(self._db_class.ptype == ptype)
+            for rule in rules:
+                query = query.filter(or_(getattr(self._db_class, "v{}".format(i)) == v for i, v in enumerate(rule)))
+            query.delete()
 
     def remove_filtered_policy(self, sec, ptype, field_index, *field_values):
         """removes policy rules that match the filter from the storage.
         This is part of the Auto-Save feature.
         """
-        query = self._session.query(self._db_class)
-        query = query.filter(self._db_class.ptype == ptype)
-        if not (0 <= field_index <= 5):
-            return False
-        if not (1 <= field_index + len(field_values) <= 6):
-            return False
-        for i, v in enumerate(field_values):
-            if v != '':
-                query = query.filter(getattr(self._db_class, "v{}".format(field_index + i)) == v)
-        r = query.delete()
-        self._commit()
+        with self._session_scope() as session:
+            query = session.query(self._db_class)
+            query = query.filter(self._db_class.ptype == ptype)
+            if not (0 <= field_index <= 5):
+                return False
+            if not (1 <= field_index + len(field_values) <= 6):
+                return False
+            for i, v in enumerate(field_values):
+                if v != '':
+                    query = query.filter(getattr(self._db_class, "v{}".format(field_index + i)) == v)
+            r = query.delete()
 
         return True if r > 0 else False
-
-    def __del__(self):
-        self._session.close()
