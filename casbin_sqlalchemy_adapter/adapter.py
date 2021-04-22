@@ -153,11 +153,14 @@ class Adapter(persist.Adapter):
 
     def remove_policies(self, sec, ptype, rules):
         """removes a policy rules from the storage."""
+        if not rules:
+            return
         with self._session_scope() as session:
             query = session.query(self._db_class)
             query = query.filter(self._db_class.ptype == ptype)
-            for rule in rules:
-                query = query.filter(or_(getattr(self._db_class, "v{}".format(i)) == v for i, v in enumerate(rule)))
+            rules = zip(*rules)
+            for i, rule in enumerate(rules):
+                query = query.filter(or_(getattr(self._db_class, "v{}".format(i)) == v for v in rule))
             query.delete()
 
     def remove_filtered_policy(self, sec, ptype, field_index, *field_values):
