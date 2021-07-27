@@ -160,7 +160,9 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             query = query.filter(self._db_class.ptype == ptype)
             rules = zip(*rules)
             for i, rule in enumerate(rules):
-                query = query.filter(or_(getattr(self._db_class, "v{}".format(i)) == v for v in rule))
+                query = query.filter(
+                    or_(getattr(self._db_class, "v{}".format(i)) == v for v in rule)
+                )
             query.delete()
 
     def remove_filtered_policy(self, sec, ptype, field_index, *field_values):
@@ -168,23 +170,23 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         This is part of the Auto-Save feature.
         """
         with self._session_scope() as session:
-            query = (session
-                     .query(self._db_class)
-                     .filter(self._db_class.ptype == ptype))
+            query = session.query(self._db_class).filter(self._db_class.ptype == ptype)
 
             if not (0 <= field_index <= 5):
                 return False
             if not (1 <= field_index + len(field_values) <= 6):
                 return False
             for i, v in enumerate(field_values):
-                if v != '':
+                if v != "":
                     v_value = getattr(self._db_class, "v{}".format(field_index + i))
                     query = query.filter(v_value == v)
             r = query.delete()
 
         return True if r > 0 else False
 
-    def update_policy(self, sec: str, ptype: str, old_rule: [str], new_rule: [str]) -> None:
+    def update_policy(
+        self, sec: str, ptype: str, old_rule: [str], new_rule: [str]
+    ) -> None:
         """
         Update the old_rule with the new_rule in the database (storage).
 
@@ -197,9 +199,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         """
 
         with self._session_scope() as session:
-            query = (session
-                     .query(self._db_class)
-                     .filter(self._db_class.ptype == ptype))
+            query = session.query(self._db_class).filter(self._db_class.ptype == ptype)
 
             # locate the old rule
             for index, value in enumerate(old_rule):
@@ -217,7 +217,17 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
                 else:
                     exec(f"old_rule_line.v{index} = None")
 
-    def update_policies(self, sec: str, ptype: str, old_rules: [[str], ], new_rules: [[str], ]) -> None:
+    def update_policies(
+        self,
+        sec: str,
+        ptype: str,
+        old_rules: [
+            [str],
+        ],
+        new_rules: [
+            [str],
+        ],
+    ) -> None:
         """
         Update the old_rules with the new_rules in the database (storage).
 
