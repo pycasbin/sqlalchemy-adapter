@@ -46,7 +46,7 @@ class Filter:
 class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
     """the interface for Casbin adapters."""
 
-    def __init__(self, engine, db_class=None, filtered=False):
+    def __init__(self, engine, db_class= None, filtered=False):
         if isinstance(engine, str):
             self._engine = create_engine(engine)
         else:
@@ -54,6 +54,12 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
 
         if db_class is None:
             db_class = CasbinRule
+        else:
+            for attr in ('ptype', 'v0', 'v1', 'v2', 'v3', 'v4', 'v5'):
+                if not hasattr(db_class, attr):
+                    raise Exception(f'{attr} not found in custom DatabaseClass.')
+            Base.metadata = db_class.metadata
+
         self._db_class = db_class
         self.session_local = sessionmaker(bind=self._engine)
 
@@ -185,7 +191,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         return True if r > 0 else False
 
     def update_policy(
-        self, sec: str, ptype: str, old_rule: [str], new_rule: [str]
+            self, sec: str, ptype: str, old_rule: [str], new_rule: [str]
     ) -> None:
         """
         Update the old_rule with the new_rule in the database (storage).
@@ -218,15 +224,15 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
                     exec(f"old_rule_line.v{index} = None")
 
     def update_policies(
-        self,
-        sec: str,
-        ptype: str,
-        old_rules: [
-            [str],
-        ],
-        new_rules: [
-            [str],
-        ],
+            self,
+            sec: str,
+            ptype: str,
+            old_rules: [
+                [str],
+            ],
+            new_rules: [
+                [str],
+            ],
     ) -> None:
         """
         Update the old_rules with the new_rules in the database (storage).

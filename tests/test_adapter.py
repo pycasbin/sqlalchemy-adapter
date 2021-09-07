@@ -1,12 +1,14 @@
+import os
+from unittest import TestCase
+
+import casbin
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.orm import sessionmaker
+
 from casbin_sqlalchemy_adapter import Adapter
 from casbin_sqlalchemy_adapter import Base
 from casbin_sqlalchemy_adapter import CasbinRule
 from casbin_sqlalchemy_adapter.adapter import Filter
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from unittest import TestCase
-import casbin
-import os
 
 
 def get_fixture(path):
@@ -35,6 +37,30 @@ def get_enforcer():
 
 
 class TestConfig(TestCase):
+    def test_custom_db_class(self):
+        class CustomRule(Base):
+            __tablename__ = "casbin_rule2"
+
+            id = Column(Integer, primary_key=True)
+            ptype = Column(String(255))
+            v0 = Column(String(255))
+            v1 = Column(String(255))
+            v2 = Column(String(255))
+            v3 = Column(String(255))
+            v4 = Column(String(255))
+            v5 = Column(String(255))
+            not_exist = Column(String(255))
+
+        engine = create_engine("sqlite://")
+        adapter = Adapter(engine, CustomRule)
+
+        session = sessionmaker(bind=engine)
+        Base.metadata.create_all(engine)
+        s = session()
+        s.add(CustomRule(not_exist="NotNone"))
+        s.commit()
+        self.assertEqual(s.query(CustomRule).all()[0].not_exist, "NotNone")
+
     def test_enforcer_basic(self):
         e = get_enforcer()
 
