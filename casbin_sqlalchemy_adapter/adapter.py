@@ -54,6 +54,12 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
 
         if db_class is None:
             db_class = CasbinRule
+        else:
+            for attr in ("ptype", "v0", "v1", "v2", "v3", "v4", "v5"):
+                if not hasattr(db_class, attr):
+                    raise Exception(f"{attr} not found in custom DatabaseClass.")
+            Base.metadata = db_class.metadata
+
         self._db_class = db_class
         self.session_local = sessionmaker(bind=self._engine)
 
