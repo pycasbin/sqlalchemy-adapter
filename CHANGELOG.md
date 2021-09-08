@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+## [0.4.1](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.4.0...v0.4.1) (2021-09-08)
+
+
+### Bug Fixes
+
+* fix db_class not vaild ([4effb2d](https://github.com/pycasbin/sqlalchemy-adapter/commit/4effb2dfe96f2b184f9f14984dacdc3a8edfa670))
+
 # [0.4.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.3.2...v0.4.0) (2021-07-21)
 
 
