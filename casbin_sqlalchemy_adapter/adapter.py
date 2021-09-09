@@ -55,7 +55,16 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         if db_class is None:
             db_class = CasbinRule
         else:
-            for attr in ("ptype", "v0", "v1", "v2", "v3", "v4", "v5"):
+            for attr in (
+                "id",
+                "ptype",
+                "v0",
+                "v1",
+                "v2",
+                "v3",
+                "v4",
+                "v5",
+            ):  # id attr was used by filter
                 if not hasattr(db_class, attr):
                     raise Exception(f"{attr} not found in custom DatabaseClass.")
             Base.metadata = db_class.metadata
@@ -101,21 +110,12 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             self._filtered = True
 
     def filter_query(self, querydb, filter):
-        if len(filter.ptype) > 0:
-            querydb = querydb.filter(CasbinRule.ptype.in_(filter.ptype))
-        if len(filter.v0) > 0:
-            querydb = querydb.filter(CasbinRule.v0.in_(filter.v0))
-        if len(filter.v1) > 0:
-            querydb = querydb.filter(CasbinRule.v1.in_(filter.v1))
-        if len(filter.v2) > 0:
-            querydb = querydb.filter(CasbinRule.v2.in_(filter.v2))
-        if len(filter.v3) > 0:
-            querydb = querydb.filter(CasbinRule.v3.in_(filter.v3))
-        if len(filter.v4) > 0:
-            querydb = querydb.filter(CasbinRule.v4.in_(filter.v4))
-        if len(filter.v5) > 0:
-            querydb = querydb.filter(CasbinRule.v5.in_(filter.v5))
-        return querydb.order_by(CasbinRule.id)
+        for attr in ("ptype", "v0", "v1", "v2", "v3", "v4", "v5"):
+            if len(getattr(filter, attr)) > 0:
+                querydb = querydb.filter(
+                    getattr(self._db_class, attr).in_(getattr(filter, attr))
+                )
+        return querydb.order_by(self._db_class.id)
 
     def _save_policy_line(self, ptype, rule):
         with self._session_scope() as session:
