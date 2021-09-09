@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+## [0.4.2](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.4.1...v0.4.2) (2021-09-09)
+
+
+### Bug Fixes
+
+* make filter query works with custom db_class ([8ee69bc](https://github.com/pycasbin/sqlalchemy-adapter/commit/8ee69bc5e8c07fe24fb0b65d43593fdea101ac22))
+
 ## [0.4.1](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.4.0...v0.4.1) (2021-09-08)
 
 
