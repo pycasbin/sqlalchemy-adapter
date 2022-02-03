@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 
+import logging
 from casbin import persist
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, or_
@@ -7,6 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
+logger = logging.getLogger(__name__)
 
 
 class CasbinRule(Base):
@@ -88,6 +90,17 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         finally:
             session.close()
 
+    def has_policy(self, ptype, rule):
+        with self._session_scope() as session:
+            query = session.query(self._db_class).filter(self._db_class.ptype == ptype)
+            # locate the rule
+            for index, value in enumerate(rule):
+                v_value = getattr(self._db_class, "v{}".format(index))
+                query = query.filter(v_value == value)
+            if query.first() is None:
+                return False
+        return True
+
     def load_policy(self, model):
         """loads all policy rules from the storage."""
         with self._session_scope() as session:
@@ -139,12 +152,19 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
 
     def add_policy(self, sec, ptype, rule):
         """adds a policy rule to the storage."""
-        self._save_policy_line(ptype, rule)
+        if not self.has_policy(ptype, rule):
+            self._save_policy_line(ptype, rule)
+            return True
+        else:
+            return False
 
     def add_policies(self, sec, ptype, rules):
         """adds a policy rules to the storage."""
         for rule in rules:
-            self._save_policy_line(ptype, rule)
+            if not self.has_policy(ptype, rule):
+                self._save_policy_line(ptype, rule)
+            else:
+                logger.debug(f"Ignoring policy: {rule} as it is already exists")
 
     def remove_policy(self, sec, ptype, rule):
         """removes a policy rule from the storage."""
