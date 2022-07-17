@@ -364,3 +364,23 @@ class TestConfig(TestCase):
 
         self.assertFalse(e.enforce("data2_admin", "data2", "write"))
         self.assertTrue(e.enforce("data2_admin", "data_test", "write"))
+
+    def test_update_filtered_policies(self):
+        e = get_enforcer()
+
+        e.update_filtered_policies(
+            [
+                ["data2_admin", "data3", "read"],
+                ["data2_admin", "data3", "write"],
+            ],
+            0,
+            "data2_admin",
+        )
+        self.assertTrue(e.enforce("data2_admin", "data3", "write"))
+        self.assertTrue(e.enforce("data2_admin", "data3", "read"))
+
+        e.update_filtered_policies([["alice", "data1", "write"]], 0, "alice")
+        self.assertTrue(e.enforce("alice", "data1", "write"))
+
+        e.update_filtered_policies([["bob", "data2", "read"]], 0, "bob")
+        self.assertTrue(e.enforce("bob", "data2", "read"))
