@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+# [0.5.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.4.2...v0.5.0) (2022-07-17)
+
+
+### Features
+
+* update_filtered_policies ([6799bc8](https://github.com/pycasbin/sqlalchemy-adapter/commit/6799bc8d7089956d640eb253ac171eb661573576))
+
 ## [0.4.2](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.4.1...v0.4.2) (2021-09-09)
 
 
