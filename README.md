@@ -42,7 +42,7 @@ obj = "data1"  # the resource that is going to be accessed.
 act = "read"  # the operation that the user performs on the resource.
 
 if e.enforce(sub, obj, act):
-    # permit alice to read data1casbin_sqlalchemy_adapter
+    # permit alice to read data1
     pass
 else:
     # deny the request, show an error
