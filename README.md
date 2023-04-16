@@ -35,7 +35,7 @@ import casbin
 
 adapter = casbin_sqlalchemy_adapter.Adapter('sqlite:///test.db')
 
-e = casbin.Enforcer('path/to/model.conf', adapter, True)
+e = casbin.Enforcer('path/to/model.conf', adapter)
 
 sub = "alice"  # the user that wants to access a resource.
 obj = "data1"  # the resource that is going to be accessed.
