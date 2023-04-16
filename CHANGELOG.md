@@ -1,5 +1,13 @@
 # Semantic Versioning Changelog
 
+## [0.5.1](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.0...v0.5.1) (2023-04-16)
+
+
+### Bug Fixes
+
+* fix CI typo ([7c17a97](https://github.com/pycasbin/sqlalchemy-adapter/commit/7c17a97a5bf0e928d1c2fe7bac0eb751da90ac58))
+* update CI script versions ([72ecd76](https://github.com/pycasbin/sqlalchemy-adapter/commit/72ecd767efd17e8a859d8014a63ee287ff4020e2))
+
 # [0.5.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.4.2...v0.5.0) (2022-07-17)
 
 
