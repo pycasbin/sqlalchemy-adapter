@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+## [0.5.2](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.1...v0.5.2) (2023-05-22)
+
+
+### Bug Fixes
+
+* Stop including README as top-level data file in package ([#63](https://github.com/pycasbin/sqlalchemy-adapter/issues/63)) ([206be72](https://github.com/pycasbin/sqlalchemy-adapter/commit/206be72ddbca38a45a02cd3ed63cd31e6158df9c))
+
 ## [0.5.1](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.0...v0.5.1) (2023-04-16)
 
 
