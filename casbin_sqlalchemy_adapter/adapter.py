@@ -3,10 +3,11 @@ from contextlib import contextmanager
 from casbin import persist
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, or_
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-Base = declarative_base()
+# declarative base class
+class Base(DeclarativeBase):
+    pass
 
 
 class CasbinRule(Base):
@@ -288,3 +289,4 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             # return deleted rules
 
             return old_rules
+
