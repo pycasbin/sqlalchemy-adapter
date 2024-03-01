@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+## [0.5.3](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.2...v0.5.3) (2024-03-01)
+
+
+### Bug Fixes
+
+* update CI version to Node.js 20 ([2f91fbc](https://github.com/pycasbin/sqlalchemy-adapter/commit/2f91fbc7b12ec61ee24a019879ac90446137d40b))
+
 ## [0.5.2](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.1...v0.5.2) (2023-05-22)
 
 
