@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+# [0.6.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.3...v0.6.0) (2024-03-01)
+
+
+### Features
+
+* replace declarative_base -> DeclarativeBase for sqlalchemy 2.0 migration ([#65](https://github.com/pycasbin/sqlalchemy-adapter/issues/65)) ([a737cd8](https://github.com/pycasbin/sqlalchemy-adapter/commit/a737cd8b1ec0bd47125aa986920f5704b076a84d))
+
 ## [0.5.3](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.2...v0.5.3) (2024-03-01)
 
 
