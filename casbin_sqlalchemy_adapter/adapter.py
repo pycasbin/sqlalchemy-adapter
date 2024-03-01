@@ -289,4 +289,3 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             # return deleted rules
 
             return old_rules
-
