@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+# [0.7.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.6.0...v0.7.0) (2024-03-02)
+
+
+### Features
+
+* update Python version to 3.9+ ([dec0ff8](https://github.com/pycasbin/sqlalchemy-adapter/commit/dec0ff8d51cdabb681a03358a7753c68ec3b7eeb))
+
 # [0.6.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.5.3...v0.6.0) (2024-03-01)
 
 
