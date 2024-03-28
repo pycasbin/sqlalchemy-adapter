@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+# [1.1.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v1.0.0...v1.1.0) (2024-03-28)
+
+
+### Features
+
+* DeclarativeBase import fails with SQLAlchemy 1.x ([#66](https://github.com/pycasbin/sqlalchemy-adapter/issues/66)) ([8b03bab](https://github.com/pycasbin/sqlalchemy-adapter/commit/8b03bab47f227e4fd16ac8f3694a8d3dbb60a17e))
+
 # [1.0.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.7.0...v1.0.0) (2024-03-28)
 
 
