@@ -1,13 +1,22 @@
 from contextlib import contextmanager
 
+import sqlalchemy
 from casbin import persist
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, or_
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import sessionmaker
 
 # declarative base class
-class Base(DeclarativeBase):
-    pass
+if sqlalchemy.__version__.startswith("1."):
+    from sqlalchemy.orm import declarative_base
+
+    Base = declarative_base()
+
+else:
+    from sqlalchemy.orm import DeclarativeBase
+
+    class Base(DeclarativeBase):
+        pass
 
 
 class CasbinRule(Base):
