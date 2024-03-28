@@ -1,5 +1,17 @@
 # Semantic Versioning Changelog
 
+# [1.0.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.7.0...v1.0.0) (2024-03-28)
+
+
+### Features
+
+* upgrade CI Python version to 3.12 ([02d357f](https://github.com/pycasbin/sqlalchemy-adapter/commit/02d357f4927b5efe991e965e419b84e8365cf035))
+
+
+### BREAKING CHANGES
+
+* trigger major release
+
 # [0.7.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v0.6.0...v0.7.0) (2024-03-02)
 
 
