@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+# [1.2.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v1.1.0...v1.2.0) (2024-05-30)
+
+
+### Features
+
+* nested session causes deadlock ([#67](https://github.com/pycasbin/sqlalchemy-adapter/issues/67)) ([d4eedda](https://github.com/pycasbin/sqlalchemy-adapter/commit/d4eedda8422b8256e708c5b5041c59a5e6dfbd99))
+
 # [1.1.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v1.0.0...v1.1.0) (2024-03-28)
 
 
