@@ -42,7 +42,7 @@ class TestConfigSoftDelete(TestConfig):
     def get_enforcer(self):
         engine = create_engine("sqlite://")
         # engine = create_engine('sqlite:///' + os.path.split(os.path.realpath(__file__))[0] + '/test.db', echo=True)
-        adapter = Adapter(engine, CasbinRuleSoftDelete, "is_deleted")
+        adapter = Adapter(engine, CasbinRuleSoftDelete, CasbinRuleSoftDelete.is_deleted)
 
         session = sessionmaker(bind=engine)
         Base.metadata.create_all(engine)

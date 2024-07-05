@@ -60,7 +60,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         self,
         engine,
         db_class=None,
-        db_class_softdelete_attribute_name=None,
+        db_class_softdelete_attribute=None,
         filtered=False,
         create_all_models=True,
     ):
@@ -69,16 +69,13 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         else:
             self._engine = engine
 
-        self.softdelete_attribute_name = None
         self.softdelete_attribute = None
 
         if db_class is None:
             db_class = CasbinRule
         else:
             # Softdelete is only supported when using custom class
-            self.softdelete_attribute_name = db_class_softdelete_attribute_name
-            if self.softdelete_attribute_name is not None:
-                self.softdelete_attribute = getattr(db_class, self.softdelete_attribute_name)
+            self.softdelete_attribute = db_class_softdelete_attribute
 
             for attr in (
                 "id",
@@ -198,7 +195,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
                 fields_with_None = [line.v0, line.v1, line.v2, line.v3, line.v4, line.v5]
                 rule = [element for element in fields_with_None if element is not None]
                 if not model.has_policy(sec, ptype, rule):
-                    setattr(line, self.softdelete_attribute_name, True)
+                    setattr(line, self.softdelete_attribute.name, True)
 
         return True
 
