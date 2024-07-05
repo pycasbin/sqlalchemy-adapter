@@ -274,7 +274,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         return True if r > 0 else False
 
     def update_policy(
-        self, sec: str, ptype: str, old_rule: [str], new_rule: [str]
+        self, sec: str, ptype: str, old_rule: list[str], new_rule: list[str]
     ) -> None:
         """
         Update the old_rule with the new_rule in the database (storage).
@@ -312,12 +312,8 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         self,
         sec: str,
         ptype: str,
-        old_rules: [
-            [str],
-        ],
-        new_rules: [
-            [str],
-        ],
+        old_rules: list[list[str]],
+        new_rules: list[list[str]],
     ) -> None:
         """
         Update the old_rules with the new_rules in the database (storage).
@@ -333,8 +329,8 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             self.update_policy(sec, ptype, old_rules[i], new_rules[i])
 
     def update_filtered_policies(
-        self, sec, ptype, new_rules: [[str]], field_index, *field_values
-    ) -> [[str]]:
+        self, sec, ptype, new_rules: list[list[str]], field_index, *field_values
+    ) -> list[list[str]]:
         """update_filtered_policies updates all the policies on the basis of the filter."""
 
         filter = Filter()
@@ -349,7 +345,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
 
         self._update_filtered_policies(new_rules, filter)
 
-    def _update_filtered_policies(self, new_rules, filter) -> [[str]]:
+    def _update_filtered_policies(self, new_rules, filter) -> list[list[str]]:
         """_update_filtered_policies updates all the policies on the basis of the filter."""
 
         with self._session_scope() as session:
