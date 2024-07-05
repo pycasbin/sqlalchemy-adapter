@@ -155,6 +155,8 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
 
     def save_policy(self, model):
         """saves all policy rules to the storage."""
+
+        # Use the default strategy when soft delete is not enabled
         if self.softdelete_attribute is None:
             with self._session_scope() as session:
                 query = session.query(self._db_class)
@@ -167,10 +169,14 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
                             self._save_policy_line(ptype, rule, session=session)
             return True
 
-        # Custom stategy for softdelete since it does not make sense to recreate the whole database table when using it
+        # Custom stategy for softdelete since it does not make sense to recreate all of the
+        # entries when using soft delete
         with self._session_scope() as session:
             query = session.query(self._db_class)
             query = self._softdelete_query(query)
+
+            # Delete entries that are not part of the model anymore
+            lines_before_changes = query.all()
 
             # Create new entries in the database
             for sec in ["p", "g"]:
@@ -178,22 +184,21 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
                     continue
                 for ptype, ast in model.model[sec].items():
                     for rule in ast.policy:
-                        # Filter for this rule in the database
+                        # Filter for rule in the database
                         filter_query = query.filter(self._db_class.ptype == ptype)
                         for index, value in enumerate(rule):
                             v_value = getattr(self._db_class, "v{}".format(index))
                             filter_query = filter_query.filter(v_value == value)
-                        # If it is not present, create an entry in the database
+                        # If the rule is not present, create an entry in the database
                         if filter_query.count() == 0:
                             self._save_policy_line(ptype, rule, session=session)
 
-            # Delete entries that are not part of the model anymore
-            lines = query.all()
-            for line in lines:
+            for line in lines_before_changes:
                 ptype = line.ptype
                 sec = ptype[0] # derived from persist.load_policy_line function
                 fields_with_None = [line.v0, line.v1, line.v2, line.v3, line.v4, line.v5]
                 rule = [element for element in fields_with_None if element is not None]
+                # If the the rule is not part of the model, set the deletion flag to True
                 if not model.has_policy(sec, ptype, rule):
                     setattr(line, self.softdelete_attribute.name, True)
 
