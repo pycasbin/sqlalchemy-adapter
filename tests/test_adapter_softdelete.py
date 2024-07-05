@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from casbin_sqlalchemy_adapter import Adapter
 from casbin_sqlalchemy_adapter import Base
-from casbin_sqlalchemy_adapter import CasbinRule
+from casbin_sqlalchemy_adapter.adapter import Filter
 
 from tests.test_adapter import TestConfig
 
@@ -60,3 +60,26 @@ class TestConfigSoftDelete(TestConfig):
         model_path = scriptdir / "rbac_model.conf"
 
         return casbin.Enforcer(str(model_path), adapter)
+    
+    def test_softdelete_flag(self):
+        e = self.get_enforcer()
+
+        session = e.adapter.session_local()
+        query = session.query(CasbinRuleSoftDelete)
+        rule_filter = Filter()
+        rule_filter.ptype = ["p"]
+        rule_filter.v0 = ["alice"]
+        rule_filter.v1 = ["data5"]
+        rule_filter.v2 = ["read"]
+        query = e.adapter.filter_query(query, rule_filter)
+
+        self.assertFalse(e.enforce("alice", "data5", "read"))
+        self.assertIsNone(query.first())
+        e.add_permission_for_user("alice", "data5", "read")
+        self.assertTrue(e.enforce("alice", "data5", "read"))
+        self.assertTrue(query.count() == 1)
+        self.assertFalse(query.first().is_deleted)
+        e.delete_permission_for_user("alice", "data5", "read")
+        self.assertFalse(e.enforce("alice", "data5", "read"))
+        self.assertTrue(query.count() == 1)
+        self.assertTrue(query.first().is_deleted)
