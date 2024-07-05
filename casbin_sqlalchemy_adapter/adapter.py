@@ -222,8 +222,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             if self.softdelete_attribute is None:
                 r = query.delete()
             else:
-                query = query.values({self.softdelete_attribute_name: True})
-                r = query.update()
+                r = query.update({self.softdelete_attribute: True})
 
         return True if r > 0 else False
 
@@ -244,8 +243,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             if self.softdelete_attribute is None:
                 query.delete()
             else:
-                query = query.values({self.softdelete_attribute_name: True})
-                query.update()
+                query.update({self.softdelete_attribute: True})
 
     def remove_filtered_policy(self, sec, ptype, field_index, *field_values):
         """removes policy rules that match the filter from the storage.
@@ -268,8 +266,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
             if self.softdelete_attribute is None:
                 r = query.delete()
             else:
-                query = query.values({self.softdelete_attribute_name: True})
-                r = query.update()
+                r = query.update({self.softdelete_attribute: True})
 
         return True if r > 0 else False
 
