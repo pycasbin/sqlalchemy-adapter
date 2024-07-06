@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+# [1.3.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v1.2.0...v1.3.0) (2024-07-06)
+
+
+### Features
+
+* Add the option to suppress MetaData.create_all call ([e99744f](https://github.com/pycasbin/sqlalchemy-adapter/commit/e99744f39dbe344de41e5a87b5057ea1c65207e4))
+
 # [1.2.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v1.1.0...v1.2.0) (2024-05-30)
 
 
