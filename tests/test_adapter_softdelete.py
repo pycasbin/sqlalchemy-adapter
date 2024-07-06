@@ -37,6 +37,15 @@ class CasbinRuleSoftDelete(Base):
     def __repr__(self):
         return '<CasbinRule {}: "{}">'.format(self.id, str(self))
 
+def query_for_rule(session, adapter, ptype, v0, v1, v2):
+    rule_filter = Filter()
+    rule_filter.ptype = [ptype]
+    rule_filter.v0 = [v0]
+    rule_filter.v1 = [v1]
+    rule_filter.v2 = [v2]
+    query = session.query(CasbinRuleSoftDelete)
+    query = adapter.filter_query(query, rule_filter)
+    return query
 
 class TestConfigSoftDelete(TestConfig):
     def get_enforcer(self):
@@ -63,15 +72,8 @@ class TestConfigSoftDelete(TestConfig):
     
     def test_softdelete_flag(self):
         e = self.get_enforcer()
-
         session = e.adapter.session_local()
-        query = session.query(CasbinRuleSoftDelete)
-        rule_filter = Filter()
-        rule_filter.ptype = ["p"]
-        rule_filter.v0 = ["alice"]
-        rule_filter.v1 = ["data5"]
-        rule_filter.v2 = ["read"]
-        query = e.adapter.filter_query(query, rule_filter)
+        query = query_for_rule(session, e.adapter, "p", "alice", "data5", "read")
 
         self.assertFalse(e.enforce("alice", "data5", "read"))
         self.assertIsNone(query.first())
@@ -83,3 +85,28 @@ class TestConfigSoftDelete(TestConfig):
         self.assertFalse(e.enforce("alice", "data5", "read"))
         self.assertTrue(query.count() == 1)
         self.assertTrue(query.first().is_deleted)
+
+    def test_save_policy_softdelete(self):
+        e = self.get_enforcer()
+        session = e.adapter.session_local()
+
+        # Turn off auto save
+        e.enable_auto_save(auto_save=False)
+
+        # Delete some preexisting rules
+        e.delete_permission_for_user("alice", "data1", "read")
+        e.delete_permission_for_user("bob", "data2", "write")
+        # Delete a non existing rule
+        e.delete_permission_for_user("bob", "data100", "read")
+        # Add some new rules
+        e.add_permission_for_user("alice", "data100", "read")
+        e.add_permission_for_user("bob", "data100", "write")
+        
+        # Write changes to database
+        e.save_policy()
+
+        self.assertTrue(query_for_rule(session, e.adapter, "p", "alice", "data1", "read").first().is_deleted)
+        self.assertTrue(query_for_rule(session, e.adapter, "p", "bob", "data2", "write").first().is_deleted)
+        self.assertIsNone(query_for_rule(session, e.adapter, "p", "bob", "data100", "read").first())
+        self.assertFalse(query_for_rule(session, e.adapter, "p", "alice", "data100", "read").first().is_deleted)
+        self.assertFalse(query_for_rule(session, e.adapter, "p", "bob", "data100", "write").first().is_deleted)
