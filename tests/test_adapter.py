@@ -38,6 +38,7 @@ class TestConfig(TestCase):
     def test_custom_db_class(self):
         class CustomRule(Base):
             __tablename__ = "casbin_rule2"
+            __table_args__ = {"extend_existing": True}
 
             id = Column(Integer, primary_key=True)
             ptype = Column(String(255))
