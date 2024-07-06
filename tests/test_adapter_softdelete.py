@@ -52,10 +52,7 @@ def query_for_rule(session, adapter, ptype, v0, v1, v2):
 class TestConfigSoftDelete(TestConfig):
     def get_enforcer(self):
         engine = create_engine("sqlite://")
-        engine = create_engine(
-            "sqlite:///" + os.path.split(os.path.realpath(__file__))[0] + "/test.db",
-            echo=True,
-        )
+        # engine = create_engine("sqlite:///" + os.path.split(os.path.realpath(__file__))[0] + "/test.db",echo=True,)
         adapter = Adapter(engine, CasbinRuleSoftDelete, CasbinRuleSoftDelete.is_deleted)
 
         session = sessionmaker(bind=engine)
