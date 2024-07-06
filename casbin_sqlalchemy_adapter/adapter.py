@@ -195,8 +195,15 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
 
             for line in lines_before_changes:
                 ptype = line.ptype
-                sec = ptype[0] # derived from persist.load_policy_line function
-                fields_with_None = [line.v0, line.v1, line.v2, line.v3, line.v4, line.v5]
+                sec = ptype[0]  # derived from persist.load_policy_line function
+                fields_with_None = [
+                    line.v0,
+                    line.v1,
+                    line.v2,
+                    line.v3,
+                    line.v4,
+                    line.v5,
+                ]
                 rule = [element for element in fields_with_None if element is not None]
                 # If the the rule is not part of the model, set the deletion flag to True
                 if not model.has_policy(sec, ptype, rule):
@@ -371,7 +378,5 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
     def _softdelete_query(self, query):
         query_softdelete = query
         if self.softdelete_attribute is not None:
-            query_softdelete = query_softdelete.where(
-                not_(self.softdelete_attribute)
-            )
+            query_softdelete = query_softdelete.where(not_(self.softdelete_attribute))
         return query_softdelete

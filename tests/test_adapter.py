@@ -11,11 +11,14 @@ from casbin_sqlalchemy_adapter import Base
 from casbin_sqlalchemy_adapter import CasbinRule
 from casbin_sqlalchemy_adapter.adapter import Filter
 
-class TestConfig(TestCase):
 
+class TestConfig(TestCase):
     def get_enforcer(self):
         engine = create_engine("sqlite://")
-        # engine = create_engine('sqlite:///' + os.path.split(os.path.realpath(__file__))[0] + '/test.db', echo=True)
+        engine = create_engine(
+            "sqlite:///" + os.path.split(os.path.realpath(__file__))[0] + "/test.db",
+            echo=True,
+        )
         adapter = Adapter(engine)
 
         session = sessionmaker(bind=engine)

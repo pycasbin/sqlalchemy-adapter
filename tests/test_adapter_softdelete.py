@@ -37,6 +37,7 @@ class CasbinRuleSoftDelete(Base):
     def __repr__(self):
         return '<CasbinRule {}: "{}">'.format(self.id, str(self))
 
+
 def query_for_rule(session, adapter, ptype, v0, v1, v2):
     rule_filter = Filter()
     rule_filter.ptype = [ptype]
@@ -47,10 +48,14 @@ def query_for_rule(session, adapter, ptype, v0, v1, v2):
     query = adapter.filter_query(query, rule_filter)
     return query
 
+
 class TestConfigSoftDelete(TestConfig):
     def get_enforcer(self):
         engine = create_engine("sqlite://")
-        # engine = create_engine('sqlite:///' + os.path.split(os.path.realpath(__file__))[0] + '/test.db', echo=True)
+        engine = create_engine(
+            "sqlite:///" + os.path.split(os.path.realpath(__file__))[0] + "/test.db",
+            echo=True,
+        )
         adapter = Adapter(engine, CasbinRuleSoftDelete, CasbinRuleSoftDelete.is_deleted)
 
         session = sessionmaker(bind=engine)
@@ -69,7 +74,7 @@ class TestConfigSoftDelete(TestConfig):
         model_path = scriptdir / "rbac_model.conf"
 
         return casbin.Enforcer(str(model_path), adapter)
-    
+
     def test_softdelete_flag(self):
         e = self.get_enforcer()
         session = e.adapter.session_local()
@@ -101,12 +106,30 @@ class TestConfigSoftDelete(TestConfig):
         # Add some new rules
         e.add_permission_for_user("alice", "data100", "read")
         e.add_permission_for_user("bob", "data100", "write")
-        
+
         # Write changes to database
         e.save_policy()
 
-        self.assertTrue(query_for_rule(session, e.adapter, "p", "alice", "data1", "read").first().is_deleted)
-        self.assertTrue(query_for_rule(session, e.adapter, "p", "bob", "data2", "write").first().is_deleted)
-        self.assertIsNone(query_for_rule(session, e.adapter, "p", "bob", "data100", "read").first())
-        self.assertFalse(query_for_rule(session, e.adapter, "p", "alice", "data100", "read").first().is_deleted)
-        self.assertFalse(query_for_rule(session, e.adapter, "p", "bob", "data100", "write").first().is_deleted)
+        self.assertTrue(
+            query_for_rule(session, e.adapter, "p", "alice", "data1", "read")
+            .first()
+            .is_deleted
+        )
+        self.assertTrue(
+            query_for_rule(session, e.adapter, "p", "bob", "data2", "write")
+            .first()
+            .is_deleted
+        )
+        self.assertIsNone(
+            query_for_rule(session, e.adapter, "p", "bob", "data100", "read").first()
+        )
+        self.assertFalse(
+            query_for_rule(session, e.adapter, "p", "alice", "data100", "read")
+            .first()
+            .is_deleted
+        )
+        self.assertFalse(
+            query_for_rule(session, e.adapter, "p", "bob", "data100", "write")
+            .first()
+            .is_deleted
+        )
