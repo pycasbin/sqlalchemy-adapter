@@ -24,17 +24,8 @@ def _deleted_by_default(context: DefaultExecutionContext) -> int | None:
         return None
 
 
-class CasbinSoftDeleteRule(Base):
-    __tablename__ = "casbin_rule"
-
-    id = Column(Integer, primary_key=True)
-    ptype = Column(String(255))
-    v0 = Column(String(255))
-    v1 = Column(String(255))
-    v2 = Column(String(255))
-    v3 = Column(String(255))
-    v4 = Column(String(255))
-    v5 = Column(String(255))
+class BaseModel(Base):
+    __abstract__ = True
 
     created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     updated_at = Column(
@@ -69,6 +60,19 @@ class CasbinSoftDeleteRule(Base):
         index=True,
         nullable=False,
     )
+
+
+class CasbinSoftDeleteRule(BaseModel):
+    __tablename__ = "casbin_rule"
+
+    id = Column(Integer, primary_key=True)
+    ptype = Column(String(255))
+    v0 = Column(String(255))
+    v1 = Column(String(255))
+    v2 = Column(String(255))
+    v3 = Column(String(255))
+    v4 = Column(String(255))
+    v5 = Column(String(255))
 
 
 engine = your_engine_factory()
