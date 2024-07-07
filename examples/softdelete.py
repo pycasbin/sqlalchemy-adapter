@@ -47,6 +47,7 @@ class CasbinSoftDeleteRule(Base):
         DateTime,
         default=_deleted_at_default,
         onupdate=_deleted_at_default,
+        nullable=True,
     )
 
     created_by = Column(Integer, default=get_current_user_id, nullable=False)
@@ -60,6 +61,7 @@ class CasbinSoftDeleteRule(Base):
         Integer,
         default=_deleted_by_default,
         onupdate=_deleted_by_default,
+        nullable=True,
     )
     is_deleted = Column(
         Boolean,
