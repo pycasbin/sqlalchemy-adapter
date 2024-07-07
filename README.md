@@ -51,7 +51,19 @@ else:
 
 ## Soft Delete example
 
-Soft Delete for casbin rules is supported, but only when using a custom casbin rule model.
+Soft Delete for casbin rules is supported, only when using a custom casbin rule model.
+The Soft Delete mechanism is enabled by passing the attribute of the flag indicating whether
+a rule is deleted to `db_class_softdelete_attribute`.
+That attribute needs to be of type `sqlalchemy.Boolean`.
+
+```python
+adapter = Adapter(
+    engine,
+    db_class=MyCustomCasbinRuleModel,
+    db_class_softdelete_attribute=MyCustomCasbinRuleModel.is_deleted,
+)
+```
+
 Please be aware that this adapter only sets a flag like `is_deleted` to `True`.
 The provided model needs to handle the update of fields like `deleted_by`, `deleted_at`, etc.
 An example for this is given in [examples/softdelete.py](examples/softdelete.py).
