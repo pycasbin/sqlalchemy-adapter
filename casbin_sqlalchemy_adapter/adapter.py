@@ -224,6 +224,7 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         """removes a policy rule from the storage."""
         with self._session_scope() as session:
             query = session.query(self._db_class)
+            query = self._softdelete_query(query)
             query = query.filter(self._db_class.ptype == ptype)
             for i, v in enumerate(rule):
                 query = query.filter(getattr(self._db_class, "v{}".format(i)) == v)
