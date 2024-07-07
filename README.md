@@ -49,6 +49,12 @@ else:
     pass
 ```
 
+## Soft Delete example
+
+Soft Delete for casbin rules is supported, but only when using a custom casbin rule model.
+Please be aware that this adapter only sets a flag like `is_deleted` to `True`.
+The provided model needs to handle the update of fields like `deleted_by`, `deleted_at`, etc.
+An example for this is given in [examples/softdelete.py](examples/softdelete.py).
 
 ### Getting Help
 
