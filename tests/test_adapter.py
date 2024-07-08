@@ -1,5 +1,6 @@
 import os
 from unittest import TestCase
+from pathlib import Path
 
 import casbin
 from sqlalchemy import create_engine, Column, Integer, String
@@ -11,35 +12,33 @@ from casbin_sqlalchemy_adapter import CasbinRule
 from casbin_sqlalchemy_adapter.adapter import Filter
 
 
-def get_fixture(path):
-    dir_path = os.path.split(os.path.realpath(__file__))[0] + "/"
-    return os.path.abspath(dir_path + path)
-
-
-def get_enforcer():
-    engine = create_engine("sqlite://")
-    # engine = create_engine('sqlite:///' + os.path.split(os.path.realpath(__file__))[0] + '/test.db', echo=True)
-    adapter = Adapter(engine)
-
-    session = sessionmaker(bind=engine)
-    Base.metadata.create_all(engine)
-    s = session()
-    s.query(CasbinRule).delete()
-    s.add(CasbinRule(ptype="p", v0="alice", v1="data1", v2="read"))
-    s.add(CasbinRule(ptype="p", v0="bob", v1="data2", v2="write"))
-    s.add(CasbinRule(ptype="p", v0="data2_admin", v1="data2", v2="read"))
-    s.add(CasbinRule(ptype="p", v0="data2_admin", v1="data2", v2="write"))
-    s.add(CasbinRule(ptype="g", v0="alice", v1="data2_admin"))
-    s.commit()
-    s.close()
-
-    return casbin.Enforcer(get_fixture("rbac_model.conf"), adapter)
-
-
 class TestConfig(TestCase):
+    def get_enforcer(self):
+        engine = create_engine("sqlite://")
+        # engine = create_engine("sqlite:///" + os.path.split(os.path.realpath(__file__))[0] + "/test.db", echo=True)
+        adapter = Adapter(engine)
+
+        session = sessionmaker(bind=engine)
+        Base.metadata.create_all(engine)
+        s = session()
+        s.query(CasbinRule).delete()
+        s.add(CasbinRule(ptype="p", v0="alice", v1="data1", v2="read"))
+        s.add(CasbinRule(ptype="p", v0="bob", v1="data2", v2="write"))
+        s.add(CasbinRule(ptype="p", v0="data2_admin", v1="data2", v2="read"))
+        s.add(CasbinRule(ptype="p", v0="data2_admin", v1="data2", v2="write"))
+        s.add(CasbinRule(ptype="g", v0="alice", v1="data2_admin"))
+        s.commit()
+        s.close()
+
+        scriptdir = Path(os.path.dirname(os.path.realpath(__file__)))
+        model_path = scriptdir / "rbac_model.conf"
+
+        return casbin.Enforcer(str(model_path), adapter)
+
     def test_custom_db_class(self):
         class CustomRule(Base):
             __tablename__ = "casbin_rule2"
+            __table_args__ = {"extend_existing": True}
 
             id = Column(Integer, primary_key=True)
             ptype = Column(String(255))
@@ -62,7 +61,7 @@ class TestConfig(TestCase):
         self.assertEqual(s.query(CustomRule).all()[0].not_exist, "NotNone")
 
     def test_enforcer_basic(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         self.assertTrue(e.enforce("alice", "data1", "read"))
         self.assertFalse(e.enforce("alice", "data1", "write"))
@@ -74,7 +73,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce("alice", "data2", "write"))
 
     def test_add_policy(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         self.assertFalse(e.enforce("eve", "data3", "read"))
         res = e.add_policies((("eve", "data3", "read"), ("eve", "data4", "read")))
@@ -83,7 +82,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce("eve", "data4", "read"))
 
     def test_add_policies(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         self.assertFalse(e.enforce("eve", "data3", "read"))
         res = e.add_permission_for_user("eve", "data3", "read")
@@ -91,7 +90,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce("eve", "data3", "read"))
 
     def test_save_policy(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
         self.assertFalse(e.enforce("alice", "data4", "read"))
 
         model = e.get_model()
@@ -104,7 +103,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce("alice", "data4", "read"))
 
     def test_remove_policy(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         self.assertFalse(e.enforce("alice", "data5", "read"))
         e.add_permission_for_user("alice", "data5", "read")
@@ -113,7 +112,7 @@ class TestConfig(TestCase):
         self.assertFalse(e.enforce("alice", "data5", "read"))
 
     def test_remove_policies(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         self.assertFalse(e.enforce("alice", "data5", "read"))
         self.assertFalse(e.enforce("alice", "data6", "read"))
@@ -125,7 +124,7 @@ class TestConfig(TestCase):
         self.assertFalse(e.enforce("alice", "data6", "read"))
 
     def test_remove_filtered_policy(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         self.assertTrue(e.enforce("alice", "data1", "read"))
         e.remove_filtered_policy(1, "data1")
@@ -185,7 +184,7 @@ class TestConfig(TestCase):
         s.close()
 
     def test_filtered_policy(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
         filter = Filter()
 
         filter.ptype = ["p"]
@@ -307,7 +306,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce("data2_admin", "data2", "write"))
 
     def test_update_policy(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
         example_p = ["mike", "cookie", "eat"]
 
         self.assertTrue(e.enforce("alice", "data1", "read"))
@@ -336,7 +335,7 @@ class TestConfig(TestCase):
         self.assertFalse(e.enforce("bob", "data2", "write"))
 
     def test_update_policies(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         old_rule_0 = ["alice", "data1", "read"]
         old_rule_1 = ["bob", "data2", "write"]
@@ -366,7 +365,7 @@ class TestConfig(TestCase):
         self.assertTrue(e.enforce("data2_admin", "data_test", "write"))
 
     def test_update_filtered_policies(self):
-        e = get_enforcer()
+        e = self.get_enforcer()
 
         e.update_filtered_policies(
             [
