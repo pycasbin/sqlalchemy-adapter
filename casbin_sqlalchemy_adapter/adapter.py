@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 import sqlalchemy
 from casbin import persist
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy import create_engine, or_, not_
 from sqlalchemy.orm import sessionmaker
 
@@ -74,6 +74,12 @@ class Adapter(persist.Adapter, persist.adapters.UpdateAdapter):
         if db_class is None:
             db_class = CasbinRule
         else:
+            if db_class_softdelete_attribute is not None and not isinstance(
+                db_class_softdelete_attribute.type, Boolean
+            ):
+                msg = f"The type of db_class_softdelete_attribute needs to be {str(Boolean)!r}. "
+                msg += f"An attribute of type {str(type(db_class_softdelete_attribute.type))!r} was given."
+                raise ValueError(msg)
             # Softdelete is only supported when using custom class
             self.softdelete_attribute = db_class_softdelete_attribute
 
