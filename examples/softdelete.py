@@ -56,6 +56,7 @@ class BaseModel(Base):
     )
     is_deleted = Column(
         Boolean,
+        default=False,
         server_default=false(),
         index=True,
         nullable=False,
