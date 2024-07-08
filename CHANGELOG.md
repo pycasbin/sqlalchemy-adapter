@@ -1,5 +1,12 @@
 # Semantic Versioning Changelog
 
+# [1.4.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v1.3.0...v1.4.0) (2024-07-08)
+
+
+### Features
+
+* support for soft deletion of casbin rules ([#72](https://github.com/pycasbin/sqlalchemy-adapter/issues/72)) ([8911c16](https://github.com/pycasbin/sqlalchemy-adapter/commit/8911c1680849b9f2020f73aed0f04d81f24686d7))
+
 # [1.3.0](https://github.com/pycasbin/sqlalchemy-adapter/compare/v1.2.0...v1.3.0) (2024-07-06)
 
 
